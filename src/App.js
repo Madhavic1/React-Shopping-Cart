@@ -4,6 +4,7 @@ import './App.css';
 import data from "./data.json"
 import { Products } from './components/Products';
 import Filter from './components/Filter';
+import Cart from './components/Cart';
 
 
 class App extends React.Component {
@@ -11,9 +12,28 @@ class App extends React.Component {
     super();
     this.state = {
       products: data.products,
+      cartItems : [],
       size: "",
       sort: "",
     };
+  }
+  addToCart = (product) => {
+    console.log("Add to Cart button clicked on Product "+product._id);
+
+    const cartItems = this.state.cartItems.slice();
+    let alreadyExist = false;
+    cartItems.forEach( (item) => {
+      if(item._id === product._id){
+        item.count++
+        alreadyExist = true
+      }
+    });
+    if(!alreadyExist){
+      cartItems.push({...product,count:1});
+    }
+    this.setState({
+      cartItems : cartItems
+    })
   }
 
   filterProducts = (event) => {
@@ -55,6 +75,12 @@ class App extends React.Component {
         ),
     }));
   };
+
+  removeFromCart = (item) => {
+    console.log("Removing "+item._id+"from the Cart");
+    const cartItems = this.state.cartItems;
+    this.setState({cartItems:cartItems.filter((x) => x._id !== item._id)});
+  }
   render() {
     return (
       <div className="grid-container">
@@ -62,7 +88,8 @@ class App extends React.Component {
           <a href="/"> React Shoppping Cart</a>
         </header>
         <main>
-          <div className="content">
+        <div className="content" >
+          <div className="main">
             <Filter
               count={this.state.products.length}
               size={this.state.size}
@@ -70,9 +97,13 @@ class App extends React.Component {
               filterProduct={this.filterProducts}
               sortProduct={this.sortProducts}
             />
-            <Products products={this.state.products} />
+            <Products products={this.state.products} addToCart={this.addToCart} />
+         
           </div>
-          <div className="sidebar">Sidebar</div>
+          <div className="sidebar">
+            <Cart count={this.state.cartItems.length} cartItems={this.state.cartItems} removeFromCart={this.removeFromCart}/>
+          </div>
+          </div>
         </main>
         <footer>All Rights are reserved</footer>
       </div>
